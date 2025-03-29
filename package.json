@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^6.0.1",
+    "@jambonz/realtimedb-helpers": "^0.8.13",
+    "@simplewebauthn/browser": "^13.1.0",
+    "google-gax": "^4.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.4.0",
+    "react-speech-recognition": "^3.10.0",
+    "speech-utils": "^1.0.1",
+    "styled-components": "^6.1.15"
+  }
+}

@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #fff; /* White background */
+  color: #333; /* Neutral text color */
+  box-sizing: border-box;
+  font-family: "Josefin Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+
+div {
+  padding: 20px;
+}
+
+
+.heading {
+  font-size: 2.5rem;
+  color: #f39c12; 
+  font-weight: bold;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  margin-left: 40px;
+}
+
+/* Button styles */
+.login {
+  display: flex; /* Align items horizontally */
+  align-items: center; /* Vertically center the items */
+  justify-content: center; /* Center content horizontally (if needed) */
+  gap: 8px; 
+  background-color: #f39c12; /* Warm yellow button */
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+  margin-right:40px;
+}
+
+.login:hover {
+  background-color: #f35c1b; /* Slightly darker yellow on hover */
+}
+
+/* Content section */
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 80px auto 40px;
+  max-width: 1000px;
+  gap: 20px;
+}
+
+.welcome {
+  flex: 1; /* Ensure the text occupies half the width */
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #666; /* Subtle gray text */
+  padding: 20px;
+  text-align: justify;
+}
+
+.homeimg {
+  flex: 1; /* Ensure the image occupies half the width */
+  max-width: 40%;
+  
+  
+}
+
+/* Footer styles */
+.session {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666; /* Subtle gray text */
+  margin-top: 40px;
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+  
+}
+
+.copy {
+  margin: 5px 0;
+}
+
+.support {
+  font-style: italic;
+  color: #f39c12; /* Match yellow theme */
+}
+.replayButton {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+
+

@@ -1,0 +1,269 @@
+.productDisplay {
+  padding-top: 150px; 
+}
+
+.topBar {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  padding: 1px 20px;
+ 
+  z-index: 1000; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.searchContainer {
+  flex-grow: 10;
+  margin-right: 20px;
+}
+.productDisplay {
+  padding: 20px;
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.searchContainer {
+  flex-grow: 1;
+  margin: 0 20px;
+}
+
+.searchBar {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.productsDisp {
+  margin-top: 20px;
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.productCard {
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.productImage {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.noResults {
+  text-align: center;
+  font-size: 25px;
+  color: #666;
+  margin-bottom: 2000px; 
+  padding: 20px; 
+}
+
+.searchBar {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+.cartButton ,.logoutButton{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 16px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f39c12;
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px; 
+  padding: 20px;
+  padding-top: 10rem;
+  max-width: 1200px;
+  margin: 0 auto; 
+}
+.productsDisp{
+  padding-top: 105rem;
+}
+.productImage {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.productCard h3 {
+  margin: 10px 0;
+  font-size: 18px;
+}
+
+.category {
+  color: #4b4b4b;
+  font-size: 14px;
+}
+
+.price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.description {
+  font-size: 14px;
+  color: #555;
+  margin: 10px 0;
+}
+
+.addToCart {
+  padding: 10px 20px;
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.addToCart:hover {
+  background-color: #f45612;
+}
+
+.noResults {
+  text-align: center;
+  font-size: 18px;
+  color: #e33030;
+  margin-top: 20px;
+  grid-column: span 2; 
+}
+
+.heading {
+  text-align: center;
+  font-size: 2.5rem;
+  margin: 20px 0;
+  color: #333;
+}
+
+.productImage {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.addToCart {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.addToCart:hover {
+  background-color:  #f45612;
+}
+.productCard {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.productCard:hover {
+  transform: translateY(-5px); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+.platformName {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-right: auto; 
+  font-size: 2.5rem;
+  color: #f39c12; 
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+.microphoneIcon {
+  cursor: pointer;
+  color: #f39c12;
+  margin-left: 10px;
+  font-size: 160px;
+}
+.searchContainer {
+  position: relative;
+  width: 100%;
+}
+
+.searchBar {
+  width: 100%;
+  padding: 15px 40px 15px 15px;
+  border: 2px solid #f39c12;
+  border-radius: 15px;
+  font-size: 16px;
+}
+
+.microphoneIcon {
+  position: absolute;
+  right: 50px; 
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #f39c12;
+  font-size: 25x;
+}
+
+
+.searchBar:hover {
+  cursor: pointer;
+}
+
+.searchBar::placeholder {
+  font-size: 17px;
+}
+
+.searchBar:focus {
+  outline: none;
+  border-color: #f45612;
+}
+.microphoneIcon svg {
+  width: 40px;
+  height: 40px;
+}
+
+.microphoneIcon:hover {
+  color:  #f45612;
+}
+
+.logoutButton:hover, .cartButton:hover {
+  background:  #f45612;
+}
+
+.userControls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+
+
+
