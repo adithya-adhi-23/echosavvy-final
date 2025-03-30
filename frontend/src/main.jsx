@@ -8,6 +8,7 @@ import Signup from './signup/Signup';
 import Cart from './cart/Cart';
 import Checkout from './checkout/Checkout'; 
 import { CartProvider } from './cart/CartContext';
+import NotFound from './notFound/NotFound'; 
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
   {
     path: '/checkout',
     element: <Checkout />, 
+  },
+  {
+    path: '*',
+    element: <NotFound />, 
   },
 ]);
 

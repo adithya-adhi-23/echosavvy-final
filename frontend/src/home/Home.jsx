@@ -3,6 +3,7 @@ import styles from "./Home.module.css";
 import { Link } from 'react-router-dom';
 import homeimg from "./home.webp";
 import { AiOutlineLogin } from "react-icons/ai";
+import { RiShoppingBag4Line } from "react-icons/ri";
 
 const Home = () => {
   const elementsRef = useRef([]);
@@ -11,18 +12,13 @@ const Home = () => {
   const speakText = (text) => {
     if (!text || !window.speechSynthesis) return;
 
-    window.speechSynthesis.cancel(); // Stop any ongoing speech
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-IN';
+    utterance.rate = 0.85;
+    utterance.pitch = 1.0;
 
-    // Set properties for better understanding (slower, natural pitch)
-    utterance.lang = 'en-IN';  // Indian English
-    utterance.rate = 0.85;      // Slower for better understanding
-    utterance.pitch = 1.0;      // Natural pitch
-
-    // Fetch available voices
     const voices = window.speechSynthesis.getVoices();
-    
-    // Prefer an Indian English female voice
     const indianVoice = voices.find(voice =>
       voice.name.includes('Indian') || voice.lang === 'en-IN'
     );
@@ -30,13 +26,12 @@ const Home = () => {
     if (indianVoice) {
       utterance.voice = indianVoice;
     } else if (voices.length > 0) {
-      utterance.voice = voices[0]; 
+      utterance.voice = voices[0];
     }
 
     window.speechSynthesis.speak(utterance);
   };
 
- 
   const handleFocus = (index) => {
     const element = elementsRef.current[index];
     if (element) {
@@ -45,14 +40,13 @@ const Home = () => {
     }
   };
 
-
   const handleMouseEnter = (event) => {
     const text = event.target.getAttribute('aria-label') || event.target.textContent || '';
     speakText(text.trim());
   };
 
   useEffect(() => {
-    speakText("Welcome to EchoSavvy! An accessible e-commerce platform for visually impaired users. Move your cursor to the right top for login");
+    speakText("Welcome to EchoSavvy! An accessible e-commerce platform. Move to the top right for login or browse products.");
     
     elementsRef.current = Array.from(document.querySelectorAll('[data-focusable="true"]'));
     
@@ -69,7 +63,6 @@ const Home = () => {
     };
   }, []);
 
-
   return (
     <div>
       <h1 
@@ -81,17 +74,31 @@ const Home = () => {
         EchoSavvy
       </h1>
 
-      <Link to="/login">
-        <button
-          className={styles.login}
-          tabIndex="0"
-          data-focusable="true"
-          aria-label="Login Button. Click to navigate to the login page."
-        >
-          <AiOutlineLogin />
-          Login
-        </button>
-      </Link>
+      <div className={styles.buttonGroup}>
+        <Link to="/login">
+          <button
+            className={styles.login}
+            tabIndex="0"
+            data-focusable="true"
+            aria-label="Login Button. Click to navigate to the login page."
+          >
+            <AiOutlineLogin size={20} />
+            <span className={styles.buttonText}>Login</span>
+          </button>
+        </Link>
+
+        <Link to="/products">
+          <button
+            className={styles.productsBtn}
+            tabIndex="0"
+            data-focusable="true"
+            aria-label="Browse Products Button. Click to view all available products without logging in."
+          >
+            <RiShoppingBag4Line size={20} /> 
+            <span className={styles.buttonText}>Products</span>
+          </button>
+        </Link>
+      </div>
 
       <div className={styles.content}>
         <p

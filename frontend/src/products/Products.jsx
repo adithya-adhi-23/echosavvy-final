@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { TiShoppingCart } from "react-icons/ti";
 import { HiMicrophone } from "react-icons/hi2";
 import { RiLogoutBoxRLine } from "react-icons/ri";
+import { MdOutlineHome } from "react-icons/md";
 import styles from "./Products.module.css";
 import axios from "axios";
 import products from "../data/products";
@@ -92,11 +93,11 @@ const Products = () => {
     const token = localStorage.getItem("token");
   
     if (!userId || !token) {
-      alert("Please log in to add items to the cart.");
+      speakText("Please log in to add items to the cart.");
       return;
     }
   
-    // Clean and validate price (handles ₹500, "500", etc.)
+ 
     const cleanPrice = Number(String(product.price).replace(/[^0-9.-]+/g, ""));
     
     if (isNaN(cleanPrice)) {
@@ -105,6 +106,7 @@ const Products = () => {
     }
   
     try {
+      speakText(`Adding ${product.name} to cart...`);
       const response = await axios.post(
         "http://localhost:8082/api/cart/add",
         {
@@ -124,12 +126,13 @@ const Products = () => {
       );
   
       if (response.status === 200) {
-        alert("Product added to cart successfully!");
-        navigate("/cart");
+        speakText(`${product.name} added successfully!`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      navigate("/cart");
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      alert("Failed to add to cart. See console for details.");
+      speakText("Failed to add to cart. See console for details.");
     }
   };
 
@@ -174,17 +177,28 @@ const Products = () => {
             <TiShoppingCart size={24} /> Cart
           </Link>
           
-          {user_id && (
-            <button 
-              className={styles.logoutButton} 
-              onClick={handleLogout}
-              onMouseEnter={() => speakText("Logout")}
-              onMouseLeave={stopSpeech}
-            >
-              <RiLogoutBoxRLine size={20} /> Logout
-            </button>
-          )}
-        </div>
+          {!user_id && (
+    <Link 
+      to="/" 
+      className={styles.homeButton}
+      onMouseEnter={() => speakText("Home button, click to return to homepage")}
+      onMouseLeave={stopSpeech}
+    >
+      <MdOutlineHome size={30} /> Home
+    </Link>
+  )}
+  
+  {user_id && (
+    <button 
+      className={styles.logoutButton} 
+      onClick={handleLogout}
+      onMouseEnter={() => speakText("Logout")}
+      onMouseLeave={stopSpeech}
+    >
+      <RiLogoutBoxRLine size={20} /> Logout
+    </button>
+  )}
+</div>
       </div>
 
       <div className={styles.productsDisp}>
@@ -212,7 +226,7 @@ const Products = () => {
               </div>
             ))
           ) : (
-            <p className={styles.noResults} aria-live="polite" onMouseEnter={() => speakText("Sorry, no products found.")}>
+            <p className={styles.noResults} aria-live="polite" onMouseEnter={() => speakText("Sorry,  no products found matching your search.")}>
               No products found.
             </p>
           )}

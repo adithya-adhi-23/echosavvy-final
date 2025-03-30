@@ -103,48 +103,43 @@ const Login = () => {
   };
 
   const confirmDetails = () => {
-    speakText(`You entered username: ${userData.username} and password: hidden. Press login to continue.`);
+    speakText(`You entered username: ${userData.username} and password:${userData.password} Press login to continue.`);
+    
   };
 
   const loginUser = async (e) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage("");
-
+  
     try {
-        const response = await axios.post("http://localhost:8082/login", userData);
-
-        if (response.data.success && response.data.token && response.data.user_id) {
-            localStorage.setItem("token", response.data.token); 
-            localStorage.setItem("user_id", response.data.user_id); 
-            localStorage.setItem("user", JSON.stringify(response.data.username));  
-
-            console.log("Login successful:", response.data);
-            
-            const guestCart = JSON.parse(localStorage.getItem("guestCart")) || [];
-            if (guestCart.length > 0) {
-                await Promise.all(
-                    guestCart.map((item) =>
-                        axios.post("/api/cart/add", { ...item, user_id: response.data.user_id })
-                    )
-                );
-                localStorage.removeItem("guestCart"); // Clear guest cart after transfer
-            }
-
-            navigate("/products"); // Redirect after login
-        } else {
-            console.error("Invalid login response:", response.data);
-            setErrorMessage("Login failed. Invalid credentials.");
-        }
+      const response = await axios.post("http://localhost:8082/login", userData);
+      
+      if (response.data.success && response.data.token) {
+       
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user_id", response.data.user_id || "");
+        localStorage.setItem("user", userData.username);
+  
+       
+        speakText(`Welcome ${userData.username}.Our products`);
+        
+       
+        setTimeout(() => {
+          navigate("/products");
+        }, 2500); 
+        
+      } else {
+        throw new Error(response.data.message || "Login failed");
+      }
     } catch (error) {
-        console.error("Login error:", error);
-        setErrorMessage("Login failed. Please check your credentials.");
+      console.error("Login error:", error);
+      setErrorMessage(error.message);
+      speakText(`Login error: ${error.message}`);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
-
-
+  };
   return (
     <div className={styles.mainContainer}>
       <h1 className={styles.pageHeading} onMouseEnter={() => handleMouseHover("Welcome to EchoSavvy login page")}>Echosavvy</h1>
@@ -180,6 +175,7 @@ const Login = () => {
         className={styles.submitButton}
         onClick={(event) => {
       confirmDetails();
+      
       loginUser(event);
   }}
   onFocus={() => handleMouseHover('Press this button to log in')}

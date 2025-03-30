@@ -19,7 +19,7 @@ const Signup = () => {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'en-US';
+      recognition.lang = 'en-IN';
 
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.trim();
@@ -91,45 +91,62 @@ const Signup = () => {
 
   const registerUser = async () => {
     console.log("📤 Sending signup request with data:", userData);
-
+  
     const trimmedUserData = {
-      username: userData.username.trim(),  
-      phone: userData.phone.replace(/\s+/g, ''), 
-      password: userData.password.replace(/\s+/g, '') 
+      username: userData.username.trim(),
+      phone: userData.phone.replace(/\s+/g, ''),
+      password: userData.password.replace(/\s+/g, '')
     };
-
-    console.log("🚀 Processed User Data:", JSON.stringify(trimmedUserData, null, 2));
-
-    
+  
     if (!trimmedUserData.username || !trimmedUserData.phone || !trimmedUserData.password) {
-      console.error("❌ Missing Fields:", trimmedUserData);
       setErrorMessage('All fields are required.');
       speakText('All fields are required.');
       return;
     }
-
+  
     try {
       const response = await axios.post('http://localhost:8082/signup', trimmedUserData, {
         headers: { "Content-Type": "application/json" }
       });
-
-      console.log("✅ Signup successful:", response.data);
-
+  
+      console.log("✅ Signup response:", response.data);
+  
       if (response.data.message === "User registered successfully") {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        speakText('Signup successful. Redirecting to products page.');
-        navigate('/products');
+       
+        try {
+          const loginResponse = await axios.post('http://localhost:8082/login', {
+            username: trimmedUserData.username,
+            password: trimmedUserData.password
+          });
+  
+          if (loginResponse.data.success) {
+          
+            localStorage.setItem('token', loginResponse.data.token);
+            localStorage.setItem('user_id', loginResponse.data.user_id);
+            localStorage.setItem('user', loginResponse.data.username);
+  
+            speakText('Account created and logged in successfully. Redirecting to products page.');
+            setTimeout(() => navigate('/products'), 1500);
+          } else {
+            throw new Error('Auto-login failed after signup');
+          }
+        } catch (loginError) {
+          console.error('Login after signup failed:', loginError);
+          speakText('Account created. Please login manually.');
+          navigate('/login');
+        }
       } else {
-        setErrorMessage(response.data.message || 'Signup failed. Please try again.');
-        speakText(response.data.message || 'Signup failed. Please try again.');
+       
+        setErrorMessage(response.data.message);
+        speakText(response.data.message);
       }
     } catch (error) {
-      console.error('❌ Signup error:', error.response?.data || error);
-      setErrorMessage(error.response?.data?.message || 'An error occurred while signing up. Please try again.');
-      speakText(error.response?.data?.message || 'An error occurred while signing up. Please try again.');
+      console.error('❌ Signup error:', error);
+      const errorMsg = error.response?.data?.message || 'Signup failed. Please try again.';
+      setErrorMessage(errorMsg);
+      speakText(errorMsg);
     }
   };
-
   return (
     <div className={styles.mainContainer}>
       <h1 
