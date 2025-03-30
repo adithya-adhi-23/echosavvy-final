@@ -87,9 +87,6 @@ const Products = () => {
     setFilteredProducts(value ? products.filter(p => p.name.toLowerCase().includes(value)) : products);
   };
 
- 
-  
-  
   const handleAddToCart = async (product) => {
     const userId = localStorage.getItem("user_id");
     const token = localStorage.getItem("token");
@@ -135,6 +132,7 @@ const Products = () => {
       alert("Failed to add to cart. See console for details.");
     }
   };
+
   return (
     <main className={styles.productDisplay}>
       <div className={styles.topBar}>
@@ -166,11 +164,17 @@ const Products = () => {
           />
         </div>
 
-        {user_id ? (
-          <div className={styles.userControls}>
-            <Link to={`/cart`} className={styles.cartButton}>
-              <TiShoppingCart size={24} /> Cart
-            </Link>
+        <div className={styles.userControls}>
+          <Link 
+            to="/cart" 
+            className={styles.cartButton}
+            onMouseEnter={() => speakText("Cart button, click to view your cart")}
+            onMouseLeave={stopSpeech}
+          >
+            <TiShoppingCart size={24} /> Cart
+          </Link>
+          
+          {user_id && (
             <button 
               className={styles.logoutButton} 
               onClick={handleLogout}
@@ -179,12 +183,8 @@ const Products = () => {
             >
               <RiLogoutBoxRLine size={20} /> Logout
             </button>
-          </div>
-        ) : (
-          <Link to="/cart" className={styles.cartButton} onMouseEnter={() => speakText("CLICK TO CART")}>
-            <TiShoppingCart size={24} /> Cart
-          </Link>
-        )}
+          )}
+        </div>
       </div>
 
       <div className={styles.productsDisp}>

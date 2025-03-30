@@ -9,6 +9,8 @@ const Signup = () => {
   const [currentField, setCurrentField] = useState(null);
   const recognitionRef = useRef(null);
   const navigate = useNavigate();
+  const synthRef = useRef(window.speechSynthesis);
+
 
 
   useEffect(() => {
