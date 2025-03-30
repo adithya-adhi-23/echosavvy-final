@@ -193,6 +193,13 @@ const Login = () => {
         >
           <p className={styles.link}>Don't Have An Account? Signup now!</p>
         </Link>
+        <Link
+          to="/"
+          onFocus={() => handleMouseHover('home page')}
+          onMouseEnter={() => handleMouseHover("Click here to go to home")}
+        >
+          <p className={styles.link}>Go to Home</p>
+        </Link>
       </div>
     </div>
   );

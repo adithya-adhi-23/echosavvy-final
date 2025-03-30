@@ -69,7 +69,7 @@ const Home = () => {
         className={styles.heading} 
         tabIndex="0" 
         data-focusable="true" 
-        aria-label="EchoSavvy: Home Page"
+        aria-label="EchoSavvy: Home Page  Move to the top right for login or browse products"
       >
         EchoSavvy
       </h1>
@@ -116,7 +116,7 @@ const Home = () => {
           alt="EchoSavvy logo"
           tabIndex="0"
           data-focusable="true"
-          aria-label="EchoSavvy homepage illustration."
+          aria-label="EchoSavvy homepage illustration.  Move to the top right for login or browse products"
         />
       </div>
 

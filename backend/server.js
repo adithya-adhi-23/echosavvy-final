@@ -216,6 +216,41 @@ app.put('/api/cart/update', async (req, res) => {
         console.error("Error updating cart:", error);
         res.status(500).json({ message: "Database error", error: error.message });
     }
+});// 1. Add passkey registration endpoint
+app.post('/auth/passkey/register', async (req, res) => {
+  const { username } = req.body;
+  
+  // Generate registration options
+  const options = {
+    challenge: crypto.randomBytes(32),
+    rp: { name: "EchoSavvy" },
+    user: {
+      id: crypto.randomBytes(16),
+      name: username,
+      displayName: username
+    },
+    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+    authenticatorSelection: {
+      userVerification: "required", // Requires biometrics
+      residentKey: "required"
+    }
+  };
+
+  res.json(options);
+});
+
+// 2. Add passkey login endpoint
+app.post('/auth/passkey/login', async (req, res) => {
+  const { credential } = req.body;
+  
+  // Verify credential against stored passkeys
+  const user = await verifyPasskey(credential); // Your verification logic
+  
+  if (user) {
+    // Return same token format as password login
+    const token = generateToken(user.id);
+    res.json({ success: true, token, user_id: user.id });
+  }
 });
 
 app.listen(8082, () => {

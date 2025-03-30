@@ -15,6 +15,7 @@ const Products = () => {
   const [user_id, setUserId] = useState(localStorage.getItem("user_id"));
   const synthRef = useRef(window.speechSynthesis);
   const recognitionRef = useRef(null);
+  const productsContainerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,6 +38,20 @@ const Products = () => {
       if (synthRef.current) synthRef.current.cancel();
     };
   }, []);
+
+  useEffect(() => {
+    if (searchTerm && filteredProducts.length > 0) {
+      setTimeout(() => {
+        if (productsContainerRef.current) {
+          productsContainerRef.current.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        }
+        speakText(`Found ${filteredProducts.length} matching products.`);
+      }, 100);
+    }
+  }, [filteredProducts, searchTerm]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -85,7 +100,12 @@ const Products = () => {
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchTerm(value);
-    setFilteredProducts(value ? products.filter(p => p.name.toLowerCase().includes(value)) : products);
+    const filtered = value ? products.filter(p => p.name.toLowerCase().includes(value)) : products;
+    setFilteredProducts(filtered);
+    
+    if (value && filtered.length === 0) {
+      speakText("No products found matching your search.");
+    }
   };
 
   const handleAddToCart = async (product) => {
@@ -97,11 +117,10 @@ const Products = () => {
       return;
     }
   
- 
     const cleanPrice = Number(String(product.price).replace(/[^0-9.-]+/g, ""));
     
     if (isNaN(cleanPrice)) {
-      alert(`Invalid price format: ${product.price}`);
+      speakText(`Invalid price format for ${product.name}`);
       return;
     }
   
@@ -113,7 +132,7 @@ const Products = () => {
           user_id: userId,
           product_id: product.id,
           product_name: product.name,
-          price: cleanPrice,  // Use cleaned price
+          price: cleanPrice,
           quantity: 1,
           image_url: product.image
         },
@@ -127,19 +146,23 @@ const Products = () => {
   
       if (response.status === 200) {
         speakText(`${product.name} added successfully!`);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      navigate("/cart");
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        navigate("/cart");
       }
     } catch (error) {
       console.error("Error:", error.response?.data || error.message);
-      speakText("Failed to add to cart. See console for details.");
+      speakText("Failed to add to cart. Please try again.");
     }
   };
 
   return (
     <main className={styles.productDisplay}>
       <div className={styles.topBar}>
-        <h1 className={styles.platformName} onMouseEnter={() => speakText("Welcome to EchoSavvy products page")}>
+        <h1 
+          className={styles.platformName} 
+          onMouseEnter={() => speakText("Welcome to EchoSavvy products page")}
+          onFocus={() => speakText("EchoSavvy products page")}
+        >
           Echosavvy
         </h1>
 
@@ -151,7 +174,8 @@ const Products = () => {
             value={searchTerm}
             onChange={handleSearch}
             aria-label="Search products by name"
-            onMouseEnter={() => speakText("Search bar for products search")}
+            onMouseEnter={() => speakText("Search bar. Type or use voice search")}
+            onFocus={() => speakText("Search products")}
             onMouseLeave={stopSpeech}
           />
 
@@ -159,10 +183,15 @@ const Products = () => {
             className={styles.microphoneIcon}
             size={20}
             onClick={startVoiceSearch}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") startVoiceSearch(); }}
+            onKeyDown={(e) => { 
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                startVoiceSearch();
+              }
+            }}
             tabIndex={0}
             aria-label="Start voice search"
-            onMouseEnter={() => speakText("Click here to search products")}
+            onMouseEnter={() => speakText("Voice search button")}
             onMouseLeave={stopSpeech}
           />
         </div>
@@ -171,62 +200,85 @@ const Products = () => {
           <Link 
             to="/cart" 
             className={styles.cartButton}
-            onMouseEnter={() => speakText("Cart button, click to view your cart")}
+            onMouseEnter={() => speakText("Cart, press to view")}
+            onFocus={() => speakText("Go to cart")}
             onMouseLeave={stopSpeech}
           >
-            <TiShoppingCart size={24} /> Cart
+            <TiShoppingCart size={24} aria-hidden="true" /> 
+            <span>Cart</span>
           </Link>
           
-          {!user_id && (
-    <Link 
-      to="/" 
-      className={styles.homeButton}
-      onMouseEnter={() => speakText("Home button, click to return to homepage")}
-      onMouseLeave={stopSpeech}
-    >
-      <MdOutlineHome size={30} /> Home
-    </Link>
-  )}
-  
-  {user_id && (
-    <button 
-      className={styles.logoutButton} 
-      onClick={handleLogout}
-      onMouseEnter={() => speakText("Logout")}
-      onMouseLeave={stopSpeech}
-    >
-      <RiLogoutBoxRLine size={20} /> Logout
-    </button>
-  )}
-</div>
+          {!user_id ? (
+            <Link 
+              to="/" 
+              className={styles.homeButton}
+              onMouseEnter={() => speakText("Home, press to return")}
+              onFocus={() => speakText("Go to home page")}
+              onMouseLeave={stopSpeech}
+            >
+              <MdOutlineHome size={20} aria-hidden="true" />
+              <span>Home</span>
+            </Link>
+          ) : (
+            <button 
+              className={styles.logoutButton} 
+              onClick={handleLogout}
+              onMouseEnter={() => speakText("Logout button")}
+              onFocus={() => speakText("Press to logout")}
+              onMouseLeave={stopSpeech}
+            >
+              <RiLogoutBoxRLine size={18} aria-hidden="true" />
+              <span>Logout</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className={styles.productsDisp}>
-        <div className={styles.productGrid} onMouseLeave={stopSpeech}>
+      <div 
+        className={styles.productsDisp} 
+        ref={productsContainerRef}
+      >
+        <div className={styles.productGrid}>
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
               <div
                 key={product.id}
                 className={styles.productCard}
-                onMouseEnter={() => speakText(`${product.name}, Price: ${product.price}, Category: ${product.category}, Description: ${product.description}`)}
+                tabIndex={0}
+                onFocus={() => speakText(`${product.name}, ${product.price}`)}
+                onMouseEnter={() => speakText(`${product.name}, ${product.price}`)}
                 onMouseLeave={stopSpeech}
               >
-                <img src={product.image} alt={product.name} className={styles.productImage} />
+                <img 
+                  src={product.image} 
+                  alt="" 
+                  className={styles.productImage}
+                  aria-hidden="true"
+                />
                 <h3>{product.name}</h3>
-                <p className={styles.category}>Category: {product.category}</p>
+                <p className={styles.category} aria-hidden="true">
+                  Category: {product.category}
+                </p>
                 <p className={styles.price}>₹{product.price}</p>
                 <button
                   className={styles.addToCart}
                   onClick={() => handleAddToCart(product)}
-                  onMouseEnter={() => speakText("Add to cart")}
+                  onMouseEnter={() => speakText(`Add ${product.name} to cart`)}
+                  onFocus={() => speakText(`Add to cart button for ${product.name}`)}
                   onMouseLeave={stopSpeech}
+                  aria-label={`Add ${product.name} to cart`}
                 >
                   Add to Cart
                 </button>
               </div>
             ))
           ) : (
-            <p className={styles.noResults} aria-live="polite" onMouseEnter={() => speakText("Sorry,  no products found matching your search.")}>
+            <p 
+              className={styles.noResults}
+              aria-live="polite"
+              onMouseEnter={() => speakText("No products found")}
+              onFocus={() => speakText("No matching products found")}
+            >
               No products found.
             </p>
           )}
