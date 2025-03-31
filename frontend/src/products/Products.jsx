@@ -12,12 +12,27 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [isListening, setIsListening] = useState(false);
-  const [user_id, setUserId] = useState(localStorage.getItem("user_id"));
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const synthRef = useRef(window.speechSynthesis);
   const recognitionRef = useRef(null);
-  const productsContainerRef = useRef(null);
   const navigate = useNavigate();
 
+  // Refs for keyboard navigation
+  const searchInputRef = useRef(null);
+  const microphoneRef = useRef(null);
+  const cartButtonRef = useRef(null);
+  const logoutButtonRef = useRef(null);
+  const homeButtonRef = useRef(null);
+  const productRefs = useRef([]);
+
+  // Check login status
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("user_id");
+    setIsLoggedIn(!!token && !!userId);
+  }, []);
+
+  // Initialize speech recognition
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -27,43 +42,63 @@ const Products = () => {
       recognitionRef.current.interimResults = false;
       recognitionRef.current.onresult = handleSpeechResult;
       recognitionRef.current.onerror = handleSpeechError;
-    } else {
-      console.warn("Speech recognition not supported.");
     }
-
-    synthRef.current.onvoiceschanged = () => synthRef.current.getVoices();
-
     return () => {
       if (recognitionRef.current) recognitionRef.current.stop();
-      if (synthRef.current) synthRef.current.cancel();
     };
   }, []);
 
+  // Keyboard shortcuts
   useEffect(() => {
-    if (searchTerm && filteredProducts.length > 0) {
-      setTimeout(() => {
-        if (productsContainerRef.current) {
-          productsContainerRef.current.scrollTo({
-            top: 0,
-            behavior: "smooth"
-          });
-        }
-        speakText(`Found ${filteredProducts.length} matching products.`);
-      }, 100);
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.key === "f") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      if (e.ctrlKey && e.key === "c") {
+        e.preventDefault();
+        handleCartClick();
+      }
+      if (e.ctrlKey && e.key === "l") {
+        e.preventDefault();
+        if (isLoggedIn) handleLogout();
+      }
+      if (e.ctrlKey && e.key === "h") {
+        e.preventDefault();
+        navigate("/");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isLoggedIn]);
+
+  // Filter products
+  useEffect(() => {
+    const results = products.filter(product =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(results);
+  }, [searchTerm]);
+
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchTerm(value);
+    if (value && filteredProducts.length === 0) {
+      speakText("No products found matching your search.");
     }
-  }, [filteredProducts, searchTerm]);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user_id");
-    localStorage.removeItem("guestCart");
+    speakText("Logged out successfully");
+    setIsLoggedIn(false);
     navigate("/login");
   };
 
   const handleSpeechResult = (event) => {
     const transcript = event.results[0][0].transcript;
     setSearchTerm(transcript);
-    handleSearch({ target: { value: transcript } });
     setIsListening(false);
   };
 
@@ -74,7 +109,6 @@ const Products = () => {
 
   const startVoiceSearch = () => {
     if (recognitionRef.current) {
-      synthRef.current.cancel();
       recognitionRef.current.start();
       setIsListening(true);
       speakText("Listening...");
@@ -91,66 +125,46 @@ const Products = () => {
     synthRef.current.speak(utterance);
   };
 
-  const stopSpeech = () => {
-    if (synthRef.current) {
-      synthRef.current.cancel();
-    }
-  };
-
-  const handleSearch = (e) => {
-    const value = e.target.value.toLowerCase();
-    setSearchTerm(value);
-    const filtered = value ? products.filter(p => p.name.toLowerCase().includes(value)) : products;
-    setFilteredProducts(filtered);
-    
-    if (value && filtered.length === 0) {
-      speakText("No products found matching your search.");
+  const handleCartClick = () => {
+    if (isLoggedIn) {
+      navigate("/cart");
+    } else {
+      speakText("Please login to view your cart");
+      navigate("/empty-cart");
     }
   };
 
   const handleAddToCart = async (product) => {
-    const userId = localStorage.getItem("user_id");
-    const token = localStorage.getItem("token");
-  
-    if (!userId || !token) {
-      speakText("Please log in to add items to the cart.");
+    if (!isLoggedIn) {
+      speakText("Please login to add items to cart");
+      navigate("/login");
       return;
     }
-  
+
     const cleanPrice = Number(String(product.price).replace(/[^0-9.-]+/g, ""));
     
     if (isNaN(cleanPrice)) {
       speakText(`Invalid price format for ${product.name}`);
       return;
     }
-  
+
     try {
       speakText(`Adding ${product.name} to cart...`);
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:8082/api/cart/add",
         {
-          user_id: userId,
+          user_id: localStorage.getItem("user_id"),
           product_id: product.id,
           product_name: product.name,
           price: cleanPrice,
           quantity: 1,
           image_url: product.image
         },
-        { 
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          } 
-        }
+        { headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` } }
       );
-  
-      if (response.status === 200) {
-        speakText(`${product.name} added successfully!`);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        navigate("/cart");
-      }
+      speakText(`${product.name} added to cart successfully!`);
+      navigate("/cart");
     } catch (error) {
-      console.error("Error:", error.response?.data || error.message);
       speakText("Failed to add to cart. Please try again.");
     }
   };
@@ -162,12 +176,14 @@ const Products = () => {
           className={styles.platformName} 
           onMouseEnter={() => speakText("Welcome to EchoSavvy products page")}
           onFocus={() => speakText("EchoSavvy products page")}
+          tabIndex="0"
         >
           Echosavvy
         </h1>
 
         <div className={styles.searchContainer}>
           <input
+            ref={searchInputRef}
             type="text"
             placeholder="Search products..."
             className={styles.searchBar}
@@ -176,10 +192,11 @@ const Products = () => {
             aria-label="Search products by name"
             onMouseEnter={() => speakText("Search bar. Type or use voice search")}
             onFocus={() => speakText("Search products")}
-            onMouseLeave={stopSpeech}
+            tabIndex="0"
           />
 
           <HiMicrophone
+            ref={microphoneRef}
             className={styles.microphoneIcon}
             size={20}
             onClick={startVoiceSearch}
@@ -189,84 +206,84 @@ const Products = () => {
                 startVoiceSearch();
               }
             }}
-            tabIndex={0}
+            tabIndex="0"
             aria-label="Start voice search"
             onMouseEnter={() => speakText("Voice search button")}
-            onMouseLeave={stopSpeech}
           />
         </div>
 
         <div className={styles.userControls}>
-          <Link 
-            to="/cart" 
+          <button 
+            ref={cartButtonRef}
+            onClick={handleCartClick}
             className={styles.cartButton}
-            onMouseEnter={() => speakText("Cart, press to view")}
-            onFocus={() => speakText("Go to cart")}
-            onMouseLeave={stopSpeech}
+            onMouseEnter={() => speakText(isLoggedIn ? "View your cart" : "Login to view cart")}
+            onFocus={() => speakText(isLoggedIn ? "View your cart" : "Login to view cart")}
+            tabIndex="0"
           >
             <TiShoppingCart size={24} aria-hidden="true" /> 
             <span>Cart</span>
-          </Link>
+          </button>
           
-          {!user_id ? (
-            <Link 
-              to="/" 
-              className={styles.homeButton}
-              onMouseEnter={() => speakText("Home, press to return")}
-              onFocus={() => speakText("Go to home page")}
-              onMouseLeave={stopSpeech}
-            >
-              <MdOutlineHome size={20} aria-hidden="true" />
-              <span>Home</span>
-            </Link>
-          ) : (
+          {isLoggedIn ? (
             <button 
+              ref={logoutButtonRef}
               className={styles.logoutButton} 
               onClick={handleLogout}
               onMouseEnter={() => speakText("Logout button")}
               onFocus={() => speakText("Press to logout")}
-              onMouseLeave={stopSpeech}
+              tabIndex="0"
             >
               <RiLogoutBoxRLine size={18} aria-hidden="true" />
               <span>Logout</span>
             </button>
+          ) : (
+            <Link 
+              ref={homeButtonRef}
+              to="/" 
+              className={styles.homeButton}
+              onMouseEnter={() => speakText("Home, press to return")}
+              onFocus={() => speakText("Go to home page")}
+              tabIndex="0"
+            >
+              <MdOutlineHome size={20} aria-hidden="true" />
+              <span>Home</span>
+            </Link>
           )}
         </div>
       </div>
 
-      <div 
-        className={styles.productsDisp} 
-        ref={productsContainerRef}
-      >
+      <div className={styles.productsDisp}>
         <div className={styles.productGrid}>
           {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
+            filteredProducts.map((product, index) => (
               <div
                 key={product.id}
+                ref={el => productRefs.current[index] = el}
                 className={styles.productCard}
-                tabIndex={0}
-                onFocus={() => speakText(`${product.name}, ${product.price}`)}
-                onMouseEnter={() => speakText(`${product.name}, ${product.price}`)}
-                onMouseLeave={stopSpeech}
+                tabIndex="0"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleAddToCart(product);
+                  }
+                }}
+                onMouseEnter={() => speakText(`${product.name}, ₹${product.price}`)}
+                onFocus={() => speakText(`${product.name}, ₹${product.price}`)}
               >
                 <img 
                   src={product.image} 
-                  alt="" 
+                  alt={product.name}
                   className={styles.productImage}
                   aria-hidden="true"
                 />
                 <h3>{product.name}</h3>
-                <p className={styles.category} aria-hidden="true">
-                  Category: {product.category}
-                </p>
+                <p className={styles.category}>Category: {product.category}</p>
                 <p className={styles.price}>₹{product.price}</p>
                 <button
                   className={styles.addToCart}
                   onClick={() => handleAddToCart(product)}
                   onMouseEnter={() => speakText(`Add ${product.name} to cart`)}
-                  onFocus={() => speakText(`Add to cart button for ${product.name}`)}
-                  onMouseLeave={stopSpeech}
-                  aria-label={`Add ${product.name} to cart`}
+                  tabIndex="-1" // Prevent button from being focusable separately
                 >
                   Add to Cart
                 </button>
