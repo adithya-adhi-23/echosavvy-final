@@ -93,14 +93,14 @@ const Cart = () => {
     return () => window.removeEventListener("blur", handleWindowBlur);
   }, []);
 
-  // Calculate total price
+
   const calculateTotal = useMemo(() => {
     return cartItems
       .reduce((total, item) => total + (parseFloat(item.price) || 0) * (item.quantity || 1), 0)
       .toFixed(2);
   }, [cartItems]);
 
-  // Handle mouse hover events for accessibility
+ 
   const handleMouseEnter = (text) => {
     if (!window.speechSynthesis.speaking) {
       stopSpeech();
@@ -251,11 +251,11 @@ const Cart = () => {
               tabIndex="0"
               onKeyDown={(e) => handleKeyDown(e, item, index)}
               onMouseEnter={() => handleMouseEnter(
-                `Product: ${item.product_name}, Quantity: ${item.quantity}, Price: ${item.price} dollars.`
+                `Product: ${item.product_name}, Quantity: ${item.quantity}, Price: ${item.price} rupees.`
               )} 
               onMouseLeave={handleMouseLeave}
               onFocus={() => speakText(
-                `Product: ${item.product_name}, Quantity: ${item.quantity}, Price: ${item.price} dollars.`,
+                `Product: ${item.product_name}, Quantity: ${item.quantity}, Price: ${item.price} rupees.`,
                 voices
               )}
             >
@@ -293,7 +293,7 @@ const Cart = () => {
                 </button>
               </div>
               
-              <p className={styles.cartPrice} tabIndex="-1">${item.price}</p>
+              <p className={styles.cartPrice} tabIndex="-1">₹{item.price}</p>
               
               <button 
                 className={styles.removeButton} 
@@ -310,12 +310,12 @@ const Cart = () => {
           
           <div className={styles.cartTotal}>
             <h3 
-              onMouseEnter={() => handleMouseEnter(`Total amount in cart is ${calculateTotal} dollars.`)} 
+              onMouseEnter={() => handleMouseEnter(`Total amount in cart is ${calculateTotal}rupees.`)} 
               onMouseLeave={handleMouseLeave}
               tabIndex="0"
-              onFocus={() => speakText(`Total amount: ${calculateTotal} dollars`, voices)}
+              onFocus={() => speakText(`Total amount: ${calculateTotal}rupees`, voices)}
             >
-              Total: ${calculateTotal}
+              Total: ₹{calculateTotal}
             </h3>
             <button 
               ref={checkoutButtonRef}

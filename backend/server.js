@@ -107,7 +107,7 @@ app.post('/api/cart/add', async (req, res) => {
 
     try {
         const decoded = jwt.verify(token, SECRET_KEY);
-        const user_id = decoded.id;  // ✅ Extract user_id from token
+        const user_id = decoded.id; 
         const { product_id, product_name, price, quantity, image_url } = req.body;
 
         if (!product_id || !product_name || !price || !quantity || !image_url) {
@@ -123,7 +123,7 @@ app.post('/api/cart/add', async (req, res) => {
         );
 
         if (existing.length > 0) {
-            // ✅ If exists, update quantity
+            
             const newQuantity = existing[0].quantity + quantity;
             await db.promise().query(
                 "UPDATE cart SET quantity = ?, total_amount = price * ? WHERE user_id = ? AND product_id = ?",
@@ -132,7 +132,6 @@ app.post('/api/cart/add', async (req, res) => {
             return res.status(200).json({ message: "Cart updated successfully" });
         }
 
-        // ✅ Insert if not in cart
         await db.promise().query(
             "INSERT INTO cart (user_id, product_id, product_name, price, quantity, image_url, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?)",
             [user_id, product_id, product_name, price, quantity, image_url, total_amount]
@@ -193,7 +192,6 @@ app.delete('/api/cart/remove', async (req, res) => {
     }
 });
 
-// ✅ Update Cart Item Quantity
 app.put('/api/cart/update', async (req, res) => {
     const token = req.headers.authorization?.split(" ")[1];
 
@@ -216,42 +214,9 @@ app.put('/api/cart/update', async (req, res) => {
         console.error("Error updating cart:", error);
         res.status(500).json({ message: "Database error", error: error.message });
     }
-});// 1. Add passkey registration endpoint
-app.post('/auth/passkey/register', async (req, res) => {
-  const { username } = req.body;
-  
-  // Generate registration options
-  const options = {
-    challenge: crypto.randomBytes(32),
-    rp: { name: "EchoSavvy" },
-    user: {
-      id: crypto.randomBytes(16),
-      name: username,
-      displayName: username
-    },
-    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
-    authenticatorSelection: {
-      userVerification: "required", // Requires biometrics
-      residentKey: "required"
-    }
-  };
-
-  res.json(options);
 });
 
-// 2. Add passkey login endpoint
-app.post('/auth/passkey/login', async (req, res) => {
-  const { credential } = req.body;
-  
-  // Verify credential against stored passkeys
-  const user = await verifyPasskey(credential); // Your verification logic
-  
-  if (user) {
-    // Return same token format as password login
-    const token = generateToken(user.id);
-    res.json({ success: true, token, user_id: user.id });
-  }
-});
+
 
 app.listen(8082, () => {
     console.log("🚀 Server is running on http://localhost:8082");
