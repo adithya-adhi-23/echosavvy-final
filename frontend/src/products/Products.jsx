@@ -17,7 +17,7 @@ const Products = () => {
   const recognitionRef = useRef(null);
   const navigate = useNavigate();
 
-  // Refs for keyboard navigation
+ 
   const searchInputRef = useRef(null);
   const microphoneRef = useRef(null);
   const cartButtonRef = useRef(null);
@@ -25,14 +25,14 @@ const Products = () => {
   const homeButtonRef = useRef(null);
   const productRefs = useRef([]);
 
-  // Check login status
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userId = localStorage.getItem("user_id");
     setIsLoggedIn(!!token && !!userId);
   }, []);
 
-  // Initialize speech recognition
+ 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -48,7 +48,7 @@ const Products = () => {
     };
   }, []);
 
-  // Keyboard shortcuts
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.key === "f") {
@@ -72,7 +72,7 @@ const Products = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isLoggedIn]);
 
-  // Filter products
+
   useEffect(() => {
     const results = products.filter(product =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -283,7 +283,7 @@ const Products = () => {
                   className={styles.addToCart}
                   onClick={() => handleAddToCart(product)}
                   onMouseEnter={() => speakText(`Add ${product.name} to cart`)}
-                  tabIndex="-1" // Prevent button from being focusable separately
+                  tabIndex="-1" 
                 >
                   Add to Cart
                 </button>

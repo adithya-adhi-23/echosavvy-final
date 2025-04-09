@@ -20,12 +20,11 @@ const Cart = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Refs for keyboard navigation
+ 
   const continueShoppingRef = useRef(null);
   const checkoutButtonRef = useRef(null);
   const itemRefs = useRef([]);
 
-  // Fetch cart items on component mount
   useEffect(() => {
     const getCartItems = async () => {
       setLoading(true);
@@ -56,7 +55,7 @@ const Cart = () => {
     getCartItems();
   }, [navigate, setCartItems]);
 
-  // Voice synthesis setup
+ 
   useEffect(() => {
     const handleVoicesChanged = () => {
       const availableVoices = window.speechSynthesis.getVoices();
@@ -72,7 +71,6 @@ const Cart = () => {
     };
   }, []);
 
-  // Announce cart contents when items change
   useEffect(() => {
     stopSpeech();
     if (cartItems.length === 0) {
@@ -82,7 +80,6 @@ const Cart = () => {
     }
   }, [cartItems, voices]);
 
-  // Clean up speech when window loses focus
   useEffect(() => {
     const handleWindowBlur = () => {
       stopSpeech();
@@ -92,7 +89,6 @@ const Cart = () => {
     window.addEventListener("blur", handleWindowBlur);
     return () => window.removeEventListener("blur", handleWindowBlur);
   }, []);
-
 
   const calculateTotal = useMemo(() => {
     return cartItems
@@ -114,11 +110,11 @@ const Cart = () => {
     stopSpeech();
   };
 
-  // Handle keyboard navigation
+  
   const handleKeyDown = (e, item, index) => {
     switch (e.key) {
       case "Enter":
-        // Focus first interactive element in the item
+       
         if (itemRefs.current[index]?.querySelector("button")) {
           itemRefs.current[index].querySelector("button").focus();
         }
@@ -142,7 +138,7 @@ const Cart = () => {
     }
   };
 
-  // Handle quantity updates
+ 
   const handleUpdateQuantity = async (product_id, change) => {
     try {
       const token = localStorage.getItem("token");
@@ -169,8 +165,6 @@ const Cart = () => {
       setError("Failed to update quantity");
     }
   };
-
-  // Handle item removal
   const handleRemoveItem = async (product_id) => {
     try {
       const token = localStorage.getItem("token");
@@ -293,7 +287,7 @@ const Cart = () => {
                 </button>
               </div>
               
-              <p className={styles.cartPrice} tabIndex="-1">₹{item.price}</p>
+              <p className={styles.cartPrice} tabIndex="-1">₹{item.price*item.quantity.toFixed(2)}</p>
               
               <button 
                 className={styles.removeButton} 

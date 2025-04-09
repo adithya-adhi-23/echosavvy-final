@@ -134,9 +134,9 @@ const Home = () => {
           className={styles.support} 
           tabIndex="0" 
           data-focusable="true" 
-          aria-label="For support, contact echosavvy@gmail.com"
+          aria-label="Need help? visit or contact:echosavvy@gmail.com"
         >
-          For support: echosavvy@gmail.com
+          Need help? visit or contact:echosavvy@gmail.com
         </p>
       </div>
     </div>

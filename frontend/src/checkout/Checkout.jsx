@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import styles from './Checkout.module.css';
+import { speakText, stopSpeech } from './speechUtilis';
 
 const Checkout = () => {
   const [activePayment, setActivePayment] = useState(null);
-  const [step, setStep] = useState(1); // Step 1: Payment selection, Step 2: Confirmation
+  const [step, setStep] = useState(1);
 
-  // Payment methods with accessibility features
   const paymentMethods = [
     {
       id: 'voice-pin',
@@ -30,22 +30,14 @@ const Checkout = () => {
     }
   ];
 
-  // Screen reader announcements
   const announce = (message, priority = 'polite') => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop any ongoing speech before announcing
-      const speech = new SpeechSynthesisUtterance(message);
-      speech.rate = 0.9;
-      window.speechSynthesis.speak(speech);
-    }
+    speakText(message, true); 
 
-    // Update the live region for screen readers
     const liveRegion = document.getElementById('a11y-live-region');
     if (liveRegion) {
       liveRegion.setAttribute('aria-live', priority);
       liveRegion.innerText = message;
 
-      // Clear after 2 seconds to allow re-announcement if needed
       setTimeout(() => {
         liveRegion.innerText = '';
       }, 2000);
@@ -55,9 +47,7 @@ const Checkout = () => {
   useEffect(() => {
     announce('Checkout page loaded. Please select your preferred payment method.');
 
-    return () => {
-      window.speechSynthesis.cancel();
-    };
+    return () => stopSpeech();
   }, []);
 
   const handlePaymentSelect = (method) => {
@@ -73,7 +63,6 @@ const Checkout = () => {
     setStep(2);
     announce(`You have selected ${activePayment.name}. Preparing your payment. Please wait.`);
 
-    // Simulate payment processing
     setTimeout(() => {
       announce(`Payment with ${activePayment.name} is being processed. You will receive confirmation shortly.`);
     }, 3000);
@@ -81,7 +70,6 @@ const Checkout = () => {
 
   return (
     <div className={styles.checkoutContainer}>
-      {/* Hidden live region for screen reader announcements */}
       <div id="a11y-live-region" aria-live="polite" className={styles.hidden}></div>
 
       <h1 className={styles.pageTitle} aria-label="Checkout">Checkout</h1>
@@ -96,8 +84,9 @@ const Checkout = () => {
                 className={`${styles.paymentCard} ${activePayment?.id === method.id ? styles.active : ''}`}
                 onClick={() => handlePaymentSelect(method)}
                 onKeyDown={(e) => e.key === 'Enter' && handlePaymentSelect(method)}
+                onMouseEnter={() => speakText(`${method.name}. ${method.description}`)}
+                onFocus={() => speakText(`${method.name}. ${method.description}`)}
                 tabIndex="0"
-                aria-label={`${method.name}. ${method.description}`}
                 role="button"
               >
                 <span className={styles.paymentIcon} aria-hidden="true">{method.icon}</span>
@@ -112,6 +101,8 @@ const Checkout = () => {
           <button 
             className={styles.confirmButton}
             onClick={handleConfirm}
+            onMouseEnter={() => speakText("Confirm payment method")}
+            onFocus={() => speakText("Confirm payment method")}
             aria-label="Confirm payment method"
           >
             Confirm Payment Method
@@ -146,6 +137,8 @@ const Checkout = () => {
           <button 
             className={styles.cancelButton}
             onClick={() => setStep(1)}
+            onMouseEnter={() => speakText("Change Payment Method")}
+            onFocus={() => speakText("Change Payment Method")}
             aria-label="Go back to payment selection"
           >
             Change Payment Method
@@ -156,16 +149,22 @@ const Checkout = () => {
       <div className={styles.accessibilityFeatures}>
         <button 
           className={styles.accessibilityButton}
-          onClick={() => announce('Current status: ' + (step === 1 ? 
-            'Select payment method. Options available: ' + paymentMethods.map(m => m.name).join(', ') : 
-            `Processing with ${activePayment?.name}. ${activePayment?.instructions}`))}
+          onClick={() => announce(
+            step === 1
+              ? `Select payment method. Options available: ${paymentMethods.map(m => m.name).join(', ')}`
+              : `Processing with ${activePayment?.name}. ${activePayment?.instructions}`
+          )}
+          onMouseEnter={() => speakText("Click to repeat instructions")}
+          onFocus={() => speakText("Click to repeat instructions")}
           aria-label="Repeat current status"
         >
           Repeat Instructions
         </button>
         <button 
           className={styles.accessibilityButton}
-          onClick={() => window.speechSynthesis.cancel()}
+          onClick={stopSpeech}
+          onMouseEnter={() => speakText("Click to stop speech")}
+          onFocus={() => speakText("Click to stop speech")}
           aria-label="Stop speech"
         >
           Stop Speech

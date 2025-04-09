@@ -8,7 +8,7 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Get current user info
+  
   const getAuthInfo = () => {
     return {
       user_id: localStorage.getItem("user_id"),
@@ -16,7 +16,7 @@ export const CartProvider = ({ children }) => {
     };
   };
 
-  // Fetch cart items from API
+
   const fetchCartItems = useCallback(async () => {
     const { user_id, token } = getAuthInfo();
     setLoading(true);
@@ -24,7 +24,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       if (!token) {
-        // Handle guest cart from localStorage
+     
         const guestCart = JSON.parse(localStorage.getItem("guestCart") || "[]");
         setCartItems(guestCart);
         return;
@@ -44,12 +44,10 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Initialize cart on mount
   useEffect(() => {
     fetchCartItems();
   }, [fetchCartItems]);
 
-  // Add item to cart
   const addToCart = async (item) => {
     const { user_id, token } = getAuthInfo();
     setLoading(true);
@@ -57,7 +55,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       if (token) {
-        // Authenticated user - add to server
+        
         const response = await axios.post(
           "http://localhost:8082/api/cart/add",
           {
@@ -70,11 +68,10 @@ export const CartProvider = ({ children }) => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        // Refresh cart after addition
         await fetchCartItems();
         return response.data;
       } else {
-        // Guest user - add to local storage
+      
         const guestCart = [...cartItems];
         const existingItem = guestCart.find(i => i.product_id === item.product_id);
 
@@ -100,7 +97,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Remove item from cart
+
   const removeItem = async (product_id) => {
     const { user_id, token } = getAuthInfo();
     setLoading(true);
@@ -127,7 +124,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Update item quantity
   const updateQuantity = async (product_id, change) => {
     const { user_id, token } = getAuthInfo();
     setLoading(true);
@@ -135,7 +131,6 @@ export const CartProvider = ({ children }) => {
 
     try {
       if (token) {
-        // Find current item to determine new quantity
         const currentItem = cartItems.find(item => item.product_id === product_id);
         if (!currentItem) return;
 
@@ -159,7 +154,7 @@ export const CartProvider = ({ children }) => {
         if (item) {
           item.quantity += change;
           if (item.quantity < 1) {
-            // Remove if quantity drops to 0
+          
             await removeItem(product_id);
           } else {
             localStorage.setItem("guestCart", JSON.stringify(guestCart));
@@ -176,7 +171,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Clear entire cart
   const clearCart = async () => {
     const { token } = getAuthInfo();
     setLoading(true);
@@ -184,8 +178,6 @@ export const CartProvider = ({ children }) => {
 
     try {
       if (token) {
-        // For authenticated users - clear on server
-        // Note: You might need to implement a clear endpoint on your backend
         await Promise.all(
           cartItems.map(item => 
             axios.delete("http://localhost:8082/api/cart/remove", {
@@ -196,7 +188,7 @@ export const CartProvider = ({ children }) => {
         );
         await fetchCartItems();
       } else {
-        // For guest users - clear local storage
+      
         localStorage.removeItem("guestCart");
         setCartItems([]);
       }
@@ -209,10 +201,9 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Calculate total items in cart
+  
   const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
-  // Calculate total price
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + (parseFloat(item.price) || 0) * (item.quantity || 1),
     0
@@ -231,7 +222,7 @@ export const CartProvider = ({ children }) => {
         clearCart,
         totalItems,
         totalPrice,
-        setCartItems // Only expose if absolutely necessary
+        setCartItems 
       }}
     >
       {children}
