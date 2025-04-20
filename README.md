@@ -7,9 +7,6 @@ EchoSavvy is an accessibility-first e-commerce website built using React (fronte
 - Voice Navigation via Speech Recognition  
 - Text-to-Speech Feedback using Web Speech API  
 - Screen Reader Support (tested with NVDA)  
-- No Traditional Cart – Direct checkout with "Yes" confirmation  
-- Secure Login/Signup (passwordless with planned fingerprint auth)  
-- Simple Product Categories – Laptops, Phones, etc.
 
  🛠 Tech Stack
 
@@ -17,6 +14,6 @@ EchoSavvy is an accessibility-first e-commerce website built using React (fronte
 - Backend: Node.js, Express  
 - Database: MySQL
 - Voice Tools: `react-speech-recognition`, `SpeechSynthesis`  
-- Hosting: Firebase Hosting / (to be deployed)
+
 
 
